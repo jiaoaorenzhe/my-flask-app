@@ -3,110 +3,214 @@ const session = require('express-session');
 
 const app = express();
 
-// 配置 session（内存存储，适合开发测试）
 app.use(session({
-  secret: 'your-secret-key-change-it', // 请换成随机字符串
+  secret: 'your-secret-key-change-it',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 } // 1小时过期
+  cookie: { maxAge: 1000 * 60 * 60 }
 }));
 
-// 解析 POST 请求的表单数据
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 简单的登录验证（硬编码账号密码，可自行修改）
 const VALID_USER = {
   username: 'lianghonglang',
   password: '2013n12y30r'
 };
 
-// 检查登录状态的中间件
 function requireLogin(req, res, next) {
   if (req.session.loggedIn) {
-    next(); // 已登录，继续访问
+    next();
   } else {
-    // 未登录，保存当前请求的地址，登录后跳转回来
     req.session.returnTo = req.originalUrl;
     res.redirect('/login');
   }
 }
 
-// 登录页面（GET）
+const globalStyles = `
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 32px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+      transition: transform 0.2s;
+    }
+    .card:hover { transform: scale(1.01); }
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .input-group { margin-bottom: 1.2rem; }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 28px;
+      outline: none;
+      transition: all 0.2s;
+      background: #f9f9f9;
+    }
+    input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
+      background: white;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 28px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 0.5rem;
+    }
+    button:hover { opacity: 0.9; }
+    .info-text {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .error-box {
+      background: #fee2e2;
+      border-left: 4px solid #ef4444;
+      padding: 12px;
+      border-radius: 16px;
+      margin-bottom: 1rem;
+      color: #b91c1c;
+      font-size: 0.9rem;
+    }
+    a { color: #667eea; text-decoration: none; }
+    .home-container { max-width: 600px; text-align: center; }
+    .home-container h1 { font-size: 2rem; margin-bottom: 1rem; }
+    .home-container p { margin: 0.8rem 0; font-size: 1rem; color: #2d2d2d; }
+    .logout-btn {
+      display: inline-block;
+      margin-top: 1.5rem;
+      background: #ef4444;
+      padding: 8px 24px;
+      border-radius: 40px;
+      color: white;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .logout-btn:hover { background: #dc2626; }
+    @media (max-width: 480px) {
+      .card { padding: 1.5rem; }
+      h2 { font-size: 1.5rem; }
+    }
+  </style>
+`;
+
 app.get('/login', (req, res) => {
-  // 如果已经登录，直接跳转主页
-  if (req.session.loggedIn) {
-    return res.redirect('/');
-  }
-  // 简单的 HTML 登录表单
+  if (req.session.loggedIn) return res.redirect('/');
   res.send(`
     <!DOCTYPE html>
     <html>
-    <head>
-      <title>登录</title>
-      <style>
-        body { font-family: Arial; margin: 50px; text-align: center; }
-        input { padding: 8px; margin: 5px; width: 200px; }
-        button { padding: 8px 20px; background: #0070f3; color: white; border: none; cursor: pointer; }
-        .error { color: red; }
-      </style>
-    </head>
+    <head><title>登录 · 我的网站</title>${globalStyles}</head>
     <body>
-      <h2>请登录</h2>
-      <form method="post" action="/login">
-        <div><input type="text" name="username" placeholder="用户名" required></div>
-        <div><input type="password" name="password" placeholder="密码" required></div>
-        <div><button type="submit">登录</button></div>
+      <div class="card">
+        <h2>欢迎回来</h2>
+        <form method="post" action="/login">
+          <div class="input-group">
+            <label>用户名</label>
+            <input type="text" name="username" placeholder="lianghonglang" required autofocus>
+          </div>
+          <div class="input-group">
+            <label>密码</label>
+            <input type="password" name="password" placeholder="········" required>
+          </div>
+          <button type="submit">登 录</button>
+        </form>
+        <div class="info-text"></div>
+      </div>
     </body>
     </html>
   `);
 });
 
-// 处理登录提交（POST）
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (username === VALID_USER.username && password === VALID_USER.password) {
     req.session.loggedIn = true;
     req.session.username = username;
-    // 如果有之前保存的跳转地址，则跳回那里，否则去主页
     const returnTo = req.session.returnTo || '/';
     delete req.session.returnTo;
     res.redirect(returnTo);
   } else {
-    // 登录失败，返回登录页并显示错误
     res.send(`
       <!DOCTYPE html>
       <html>
-      <head><title>登录失败</title></head>
+      <head><title>登录失败</title>${globalStyles}</head>
       <body>
-        <h3>用户名或密码错误</h3>
-        <a href="/login">重新登录</a>
+        <div class="card">
+          <h2>登录失败</h2>
+          <div class="error-box">用户名或密码错误，请重试。</div>
+          <a href="/login" style="display:block; text-align:center;">返回登录页</a>
+        </div>
       </body>
       </html>
     `);
   }
 });
 
-// 登出
 app.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login');
   });
 });
 
-// 受保护的主页（需要登录）
 app.get('/', requireLogin, (req, res) => {
   const now = new Date();
   res.send(`
-    <h1>我的动态网站 (带登录保护)</h1>
-    <p>当前用户: ${req.session.username}</p>
-    <p>当前时间: ${now}</p>
-    <p><a href="/logout">登出</a></p>
-    <p>部署在 Vercel 免费服务上。</p>
+    <!DOCTYPE html>
+    <html>
+    <head><title>我的主页</title>${globalStyles}</head>
+    <body>
+      <div class="card home-container">
+        <h2>✨ 安全空间 ✨</h2>
+        <p>当前用户：<strong>${req.session.username}</strong></p>
+        <p>🕒 服务器时间：${now.toLocaleString()}</p>
+        <p>✅ 您已成功登录，欢迎访问私人区域。</p>
+        <a href="/logout" class="logout-btn">登 出</a>
+        <div class="info-text" style="margin-top: 2rem;">Powered by Vercel + Node.js</div>
+      </div>
+    </body>
+    </html>
   `);
 });
 
-// 你可以添加更多受保护的路由，例如 /about，同样加上 requireLogin 中间件
-
-// Vercel 需要导出 app
 module.exports = app;
