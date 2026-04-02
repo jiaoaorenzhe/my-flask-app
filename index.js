@@ -57,8 +57,6 @@ app.get('/login', (req, res) => {
         <div><input type="text" name="username" placeholder="用户名" required></div>
         <div><input type="password" name="password" placeholder="密码" required></div>
         <div><button type="submit">登录</button></div>
-      </form>
-      <p>测试账号: admin / 123456</p>
     </body>
     </html>
   `);
