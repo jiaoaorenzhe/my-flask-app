@@ -195,9 +195,17 @@ app.get('/logout', (req, res) => {
 
 app.get('/', requireLogin, (req, res) => {
   const now = new Date();
-  // 假设你复制了一个 B站视频的 iframe 代码
-  const bilibiliIframe = `<iframe src="//player.bilibili.com/player.html?aid=你的aid&bvid=你的bvid&cid=你的cid&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="width:100%; aspect-ratio:16/9; border-radius:16px;"></iframe>`;
-  
+  // 直接把 iframe 写在这里，不要用变量拼接
+  const videoIframe = `
+    <iframe src="//player.bilibili.com/player.html?bvid=BV1xx411c7mD&page=1" 
+            scrolling="no" 
+            border="0" 
+            frameborder="no" 
+            framespacing="0" 
+            allowfullscreen="true" 
+            style="width:100%; aspect-ratio:16/9; border-radius:16px;">
+    </iframe>
+  `;
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -206,7 +214,7 @@ app.get('/', requireLogin, (req, res) => {
       <div class="card" style="max-width: 800px;">
         <h2>🎬 我的视频收藏</h2>
         <div style="margin: 20px 0;">
-          ${<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=116297580938970&bvid=BV1V3XtBPECf&cid=37007198676&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>}
+          ${BV1V3XtBPECf}
         </div>
         <p>当前用户：<strong>${req.session.username}</strong></p>
         <p>🕒 最后登录：${now.toLocaleString()}</p>
