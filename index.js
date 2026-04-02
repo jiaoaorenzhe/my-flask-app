@@ -17,8 +17,8 @@ app.use(express.json());
 
 // 简单的登录验证（硬编码账号密码，可自行修改）
 const VALID_USER = {
-  username: 'admin',
-  password: '123456'
+  username: 'lianghonglang',
+  password: '2013n12y30r'
 };
 
 // 检查登录状态的中间件
