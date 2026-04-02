@@ -147,11 +147,11 @@ app.get('/login', (req, res) => {
         <form method="post" action="/login">
           <div class="input-group">
             <label>用户名</label>
-            <input type="text" name="username" placeholder="lianghonglang" required autofocus>
+            <input type="text" name="username" placeholder="用户名" required autofocus>
           </div>
           <div class="input-group">
             <label>密码</label>
-            <input type="password" name="password" placeholder="········" required>
+            <input type="password" name="password" placeholder="密码" required>
           </div>
           <button type="submit">登 录</button>
         </form>
