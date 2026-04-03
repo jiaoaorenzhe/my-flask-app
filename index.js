@@ -264,10 +264,19 @@ app.get('/logout', (req, res) => {
   });
 });
 
-// ---------- 论坛风格主页（无空壳链接，只保留布局） ----------
+// ---------- 通用风格主页（无游戏/论坛特定内容） ----------
 app.get('/', requireLogin, (req, res) => {
   const now = new Date();
   const username = req.session.username;
+  
+  // 模拟帖子数据（可替换为从 posts 文件夹读取）
+  const posts = [
+    { title: '如何快速搭建个人网站', date: '4月3日', words: 245 },
+    { title: 'Markdown 写作指南', date: '4月2日', words: 189 },
+    { title: 'Vercel 部署避坑笔记', date: '4月1日', words: 132 },
+    { title: 'JavaScript 数组方法总结', date: '3月30日', words: 567 },
+    { title: 'CSS Grid 布局完全指南', date: '3月28日', words: 98 }
+  ];
   
   const forumStyles = `
     <style>
@@ -316,32 +325,35 @@ app.get('/', requireLogin, (req, res) => {
         margin-bottom: 2rem;
         text-align: center;
       }
-      .feature-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin: 2rem 0;
+      .post-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
       }
-      .feature-item {
-        background: white;
-        border-radius: 20px;
-        padding: 1rem;
-        text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        transition: transform 0.2s;
+      .post-item {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 0;
+        transition: background 0.2s;
       }
-      .feature-item:hover {
-        transform: translateY(-4px);
-      }
-      .feature-icon {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-      }
-      .news-card {
+      .post-item:hover {
         background: #f9fafb;
-        border-radius: 20px;
-        padding: 1.2rem;
-        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+      }
+      .post-title {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+      }
+      .post-title a {
+        color: #1f2937;
+        text-decoration: none;
+      }
+      .post-title a:hover {
+        color: #667eea;
+      }
+      .post-meta {
+        font-size: 0.8rem;
+        color: #9ca3af;
       }
       .sidebar-card {
         background: white;
@@ -356,21 +368,6 @@ app.get('/', requireLogin, (req, res) => {
         margin-bottom: 1rem;
         border-left: 4px solid #667eea;
         padding-left: 0.75rem;
-      }
-      .post-list {
-        list-style: none;
-        padding: 0;
-      }
-      .post-list li {
-        margin-bottom: 0.8rem;
-        border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 0.5rem;
-      }
-      .post-list a {
-        color: #1f2937;
-      }
-      .post-list a:hover {
-        color: #667eea;
       }
       .btn-sm {
         background: #667eea;
@@ -409,10 +406,21 @@ app.get('/', requireLogin, (req, res) => {
     </style>
   `;
   
+  let postsHtml = '<ul class="post-list">';
+  posts.forEach(post => {
+    postsHtml += `
+      <li class="post-item">
+        <div class="post-title"><a href="#">${post.title}</a></div>
+        <div class="post-meta">${post.date} | ${post.words}字</div>
+      </li>
+    `;
+  });
+  postsHtml += '</ul>';
+  
   const html = `
     <!DOCTYPE html>
     <html>
-    <head><title>我的社区 · 主页</title>${globalStyles}${forumStyles}</head>
+    <head><title>我的主页</title>${globalStyles}${forumStyles}</head>
     <body>
       <div class="forum-container">
         <div class="forum-nav">
@@ -422,66 +430,35 @@ app.get('/', requireLogin, (req, res) => {
         </div>
         
         <div class="welcome-card">
-          <h2>🎮 欢迎回来，${username}！</h2>
-          <p>🕒 服务器时间：${now.toLocaleString()}</p>
+          <h2>✨ 欢迎回来，${username}！</h2>
+          <p>🕒 当前时间：${now.toLocaleString()}</p>
         </div>
         
         <div class="grid-main">
           <div>
-            <div class="feature-grid">
-              <div class="feature-item">
-                <div class="feature-icon">📦</div>
-                <h3>冒险世界</h3>
-                <p>筑梦之旅</p>
-              </div>
-              <div class="feature-item">
-                <div class="feature-icon">🎨</div>
-                <h3>材质分享</h3>
-                <p>光影·纹理包</p>
-              </div>
-              <div class="feature-item">
-                <div class="feature-icon">⚙️</div>
-                <h3>模组讨论</h3>
-                <p>Forge / Fabric</p>
-              </div>
-            </div>
-            
-            <div class="news-card">
-              <h3>📰 最新资讯</h3>
-              <ul class="post-list">
-                <li><a href="#">Minecraft Java版 26w14a 发布 —— Herdcraft 更新</a></li>
-                <li><a href="#">基岩版 Beta 1.21.50 新特性预览</a></li>
-                <li><a href="#">社区建筑大赛报名开启</a></li>
-              </ul>
-            </div>
-            
-            <div class="news-card">
-              <h3>🖼️ 图文推荐</h3>
-              <div style="display:flex; gap:1rem; flex-wrap:wrap;">
-                <div style="background:#e5e7eb; border-radius:16px; padding:1rem; flex:1; text-align:center;">🏰 建筑展示</div>
-                <div style="background:#e5e7eb; border-radius:16px; padding:1rem; flex:1; text-align:center;">⚔️ 生存日记</div>
-                <div style="background:#e5e7eb; border-radius:16px; padding:1rem; flex:1; text-align:center;">🎮 红石科技</div>
-              </div>
+            <div class="sidebar-card" style="padding: 0 1.2rem 1.2rem 1.2rem;">
+              <div class="sidebar-title" style="margin-top: 1.2rem;">📝 最新文章</div>
+              ${postsHtml}
             </div>
           </div>
           
           <div>
             <div class="sidebar-card">
-              <div class="sidebar-title">✅ 每日签到</div>
-              <p>签到可获得积分</p>
-              <a href="#" class="btn-sm">签到（演示）</a>
+              <div class="sidebar-title">👤 关于我</div>
+              <p>一个喜欢折腾代码的人，分享学习笔记和生活感悟。</p>
             </div>
             <div class="sidebar-card">
-              <div class="sidebar-title">👥 热门帖子</div>
-              <ul class="post-list">
-                <li><a href="#">如何开始你的第一个模组？</a></li>
-                <li><a href="#">建筑大赛作品展示</a></li>
-                <li><a href="#">服务器宣传集中贴</a></li>
-              </ul>
+              <div class="sidebar-title">🏷️ 热门标签</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <span class="btn-sm" style="background:#e5e7eb; color:#4b5563;">JavaScript</span>
+                <span class="btn-sm" style="background:#e5e7eb; color:#4b5563;">CSS</span>
+                <span class="btn-sm" style="background:#e5e7eb; color:#4b5563;">Node.js</span>
+                <span class="btn-sm" style="background:#e5e7eb; color:#4b5563;">Vercel</span>
+              </div>
             </div>
             <div class="sidebar-card">
-              <div class="sidebar-title">🎵 友情链接</div>
-              <p>旋律云 · 免费不限速存储</p>
+              <div class="sidebar-title">🔗 友情链接</div>
+              <p><a href="#">我的GitHub</a> | <a href="#">个人博客</a></p>
             </div>
           </div>
         </div>
@@ -489,13 +466,13 @@ app.get('/', requireLogin, (req, res) => {
         <div class="footer-nav">
           <a href="/">首页</a>
           <a href="/blog">博客</a>
-          <a href="#">关于本站</a>
-          <a href="#">联系我们</a>
+          <a href="#">关于</a>
+          <a href="#">联系</a>
           <a href="/logout">登出</a>
         </div>
         
         <div class="info-text" style="margin-top: 1rem; text-align: center;">
-          Powered by Vercel + Node.js | 我的个人社区
+          Powered by Vercel + Node.js
         </div>
       </div>
     </body>
