@@ -33,7 +33,7 @@ function requireLogin(req, res, next) {
   }
 }
 
-// 全局样式（复用于所有页面）
+// 全局基础样式（复用于所有页面）
 const globalStyles = `
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <style>
@@ -205,7 +205,7 @@ const globalStyles = `
   </style>
 `;
 
-// 登录页面
+// ---------- 登录相关路由 ----------
 app.get('/login', (req, res) => {
   if (req.session.loggedIn) return res.redirect('/');
   res.send(`
@@ -233,7 +233,6 @@ app.get('/login', (req, res) => {
   `);
 });
 
-// 处理登录
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (username === VALID_USER.username && password === VALID_USER.password) {
@@ -259,22 +258,19 @@ app.post('/login', (req, res) => {
   }
 });
 
-// 登出
 app.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login');
   });
 });
 
-// 受保护的主页（论坛风格）
+// ---------- 论坛风格主页 ----------
 app.get('/', requireLogin, (req, res) => {
   const now = new Date();
   const username = req.session.username;
   
-  // 额外补充论坛专用样式（在 globalStyles 基础上增加）
   const forumStyles = `
     <style>
-      /* 论坛布局扩展 */
       .forum-container {
         max-width: 1200px;
         width: 100%;
@@ -395,7 +391,6 @@ app.get('/', requireLogin, (req, res) => {
       .logout-link {
         background: #ef4444;
         color: white !important;
-        margin-left: auto;
       }
       .blog-link {
         background: #10b981;
@@ -410,7 +405,6 @@ app.get('/', requireLogin, (req, res) => {
     <head><title>我的社区 · 主页</title>${globalStyles}${forumStyles}</head>
     <body>
       <div class="forum-container">
-        <!-- 导航栏 -->
         <div class="forum-nav">
           <a href="/">首页</a>
           <a href="/blog">博客</a>
@@ -423,18 +417,14 @@ app.get('/', requireLogin, (req, res) => {
           <a href="/logout" class="logout-link">登出</a>
         </div>
         
-        <!-- 欢迎横幅 -->
         <div class="welcome-card">
           <h2>🎮 欢迎回来，${username}！</h2>
           <p>今日已签到 · 铁粒 +5</p>
           <p>🕒 服务器时间：${now.toLocaleString()}</p>
         </div>
         
-        <!-- 主内容区：两列布局 -->
         <div class="grid-main">
-          <!-- 左侧：主要内容 -->
           <div>
-            <!-- 特色推荐（类似苦力怕论坛的板块） -->
             <div class="feature-grid">
               <div class="feature-item">
                 <div class="feature-icon">📦</div>
@@ -454,7 +444,6 @@ app.get('/', requireLogin, (req, res) => {
               </div>
             </div>
             
-            <!-- 最新资讯 -->
             <div class="news-card">
               <h3>📰 最新资讯</h3>
               <ul class="post-list">
@@ -464,7 +453,6 @@ app.get('/', requireLogin, (req, res) => {
               </ul>
             </div>
             
-            <!-- 图文推荐 -->
             <div class="news-card">
               <h3>🖼️ 图文推荐</h3>
               <div style="display:flex; gap:1rem; flex-wrap:wrap;">
@@ -475,7 +463,6 @@ app.get('/', requireLogin, (req, res) => {
             </div>
           </div>
           
-          <!-- 右侧边栏 -->
           <div>
             <div class="sidebar-card">
               <div class="sidebar-title">✅ 每日签到</div>
@@ -520,3 +507,99 @@ app.get('/', requireLogin, (req, res) => {
   
   res.send(html);
 });
+
+// ---------- 博客路由 ----------
+app.get('/blog', requireLogin, (req, res) => {
+  const postsDir = path.join(__dirname, 'posts');
+  let files = [];
+  try {
+    files = fs.readdirSync(postsDir).filter(f => f.endsWith('.md'));
+  } catch (err) {
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>博客</title>${globalStyles}</head>
+      <body>
+        <div class="card" style="max-width:800px;">
+          <h2>📝 博客</h2>
+          <p>暂无文章，请先创建 posts 文件夹并添加 .md 文件。</p>
+          <a href="/">返回主页</a>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+  
+  if (files.length === 0) {
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>博客</title>${globalStyles}</head>
+      <body>
+        <div class="card" style="max-width:800px;">
+          <h2>📝 博客</h2>
+          <p>还没有文章，去写一篇吧！</p>
+          <a href="/">返回主页</a>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+  
+  let listHtml = '<ul style="list-style:none; padding:0;">';
+  files.forEach(file => {
+    const name = file.replace('.md', '');
+    listHtml += `<li style="margin: 10px 0;"><a href="/blog/${name}">📄 ${name}</a></li>`;
+  });
+  listHtml += '</ul>';
+  
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head><title>博客列表</title>${globalStyles}</head>
+    <body>
+      <div class="card" style="max-width:800px;">
+        <h2>📝 博客列表</h2>
+        ${listHtml}
+        <div style="margin-top:20px;"><a href="/">← 回到主页</a></div>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
+app.get('/blog/:slug', requireLogin, (req, res) => {
+  const slug = req.params.slug;
+  const filePath = path.join(__dirname, 'posts', `${slug}.md`);
+  try {
+    const markdown = fs.readFileSync(filePath, 'utf8');
+    const htmlContent = marked(markdown);
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>${slug}</title>${globalStyles}</head>
+      <body>
+        <div class="card" style="max-width:800px;">
+          <div class="blog-content">${htmlContent}</div>
+          <div style="margin-top:30px;">
+            <a href="/blog">← 返回博客列表</a> | 
+            <a href="/">主页</a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (err) {
+    res.status(404).send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>404</title>${globalStyles}</head>
+      <body>
+        <div class="card"><h2>文章不存在</h2><a href="/blog">返回列表</a></div>
+      </body>
+      </html>
+    `);
+  }
+});
+
+module.exports = app;
