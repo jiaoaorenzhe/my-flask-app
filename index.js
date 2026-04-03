@@ -1,8 +1,12 @@
 const express = require('express');
 const session = require('express-session');
+const fs = require('fs');
+const path = require('path');
+const { marked } = require('marked');
 
 const app = express();
 
+// 配置 session
 app.use(session({
   secret: 'your-secret-key-change-it',
   resave: false,
@@ -13,11 +17,13 @@ app.use(session({
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// 登录验证（可改为环境变量）
 const VALID_USER = {
   username: 'lianghonglang',
   password: '2013n12y30r'
 };
 
+// 登录检查中间件
 function requireLogin(req, res, next) {
   if (req.session.loggedIn) {
     next();
@@ -27,10 +33,15 @@ function requireLogin(req, res, next) {
   }
 }
 
+// 全局样式（复用于所有页面）
 const globalStyles = `
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -50,7 +61,9 @@ const globalStyles = `
       max-width: 420px;
       transition: transform 0.2s;
     }
-    .card:hover { transform: scale(1.01); }
+    .card:hover {
+      transform: scale(1.01);
+    }
     h2 {
       font-size: 1.8rem;
       font-weight: 600;
@@ -61,7 +74,9 @@ const globalStyles = `
       background-clip: text;
       color: transparent;
     }
-    .input-group { margin-bottom: 1.2rem; }
+    .input-group {
+      margin-bottom: 1.2rem;
+    }
     label {
       display: block;
       font-size: 0.9rem;
@@ -97,7 +112,9 @@ const globalStyles = `
       transition: opacity 0.2s;
       margin-top: 0.5rem;
     }
-    button:hover { opacity: 0.9; }
+    button:hover {
+      opacity: 0.9;
+    }
     .info-text {
       text-align: center;
       margin-top: 1.5rem;
@@ -113,10 +130,23 @@ const globalStyles = `
       color: #b91c1c;
       font-size: 0.9rem;
     }
-    a { color: #667eea; text-decoration: none; }
-    .home-container { max-width: 600px; text-align: center; }
-    .home-container h1 { font-size: 2rem; margin-bottom: 1rem; }
-    .home-container p { margin: 0.8rem 0; font-size: 1rem; color: #2d2d2d; }
+    a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    .home-container {
+      max-width: 600px;
+      text-align: center;
+    }
+    .home-container h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .home-container p {
+      margin: 0.8rem 0;
+      font-size: 1rem;
+      color: #2d2d2d;
+    }
     .logout-btn {
       display: inline-block;
       margin-top: 1.5rem;
@@ -127,14 +157,55 @@ const globalStyles = `
       font-weight: 500;
       transition: background 0.2s;
     }
-    .logout-btn:hover { background: #dc2626; }
+    .logout-btn:hover {
+      background: #dc2626;
+    }
+    /* 博客内容样式 */
+    .blog-content {
+      text-align: left;
+      line-height: 1.6;
+      color: #1f2937;
+    }
+    .blog-content h1, .blog-content h2, .blog-content h3 {
+      margin: 1.2em 0 0.5em;
+    }
+    .blog-content p {
+      margin: 0.8em 0;
+    }
+    .blog-content ul, .blog-content ol {
+      margin: 0.5em 0 0.5em 1.5em;
+    }
+    .blog-content code {
+      background: #f1f5f9;
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+    .blog-content pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 12px;
+      overflow-x: auto;
+    }
+    .blog-content blockquote {
+      border-left: 4px solid #667eea;
+      margin: 1em 0;
+      padding-left: 1em;
+      color: #4b5563;
+    }
     @media (max-width: 480px) {
-      .card { padding: 1.5rem; }
-      h2 { font-size: 1.5rem; }
+      .card {
+        padding: 1.5rem;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
     }
   </style>
 `;
 
+// 登录页面
 app.get('/login', (req, res) => {
   if (req.session.loggedIn) return res.redirect('/');
   res.send(`
@@ -162,6 +233,7 @@ app.get('/login', (req, res) => {
   `);
 });
 
+// 处理登录
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
   if (username === VALID_USER.username && password === VALID_USER.password) {
@@ -187,43 +259,132 @@ app.post('/login', (req, res) => {
   }
 });
 
+// 登出
 app.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login');
   });
 });
 
+// 受保护的主页
 app.get('/', requireLogin, (req, res) => {
   const now = new Date();
-  // 直接把 iframe 写在这里，不要用变量拼接
-  const videoIframe = `
-    <iframe src="//player.bilibili.com/player.html?bvid=RqXS1tV&page=1" 
-            scrolling="no" 
-            border="0" 
-            frameborder="no" 
-            framespacing="0" 
-            allowfullscreen="true" 
-            style="width:100%; aspect-ratio:16/9; border-radius:16px;">
-    </iframe>
-  `;
   res.send(`
     <!DOCTYPE html>
     <html>
-    <head><title>我的视频主页</title>${globalStyles}</head>
+    <head><title>我的主页</title>${globalStyles}</head>
     <body>
-      <div class="card" style="max-width: 800px;">
-        <h2>🎬 我的视频收藏</h2>
-        <div style="margin: 20px 0;">
-          ${videoIframe}
-        </div>
+      <div class="card home-container">
+        <h2>✨ 安全空间 ✨</h2>
         <p>当前用户：<strong>${req.session.username}</strong></p>
-        <p>🕒 最后登录：${now.toLocaleString()}</p>
-        <div style="margin-top: 20px;">
-          <a href="/logout" class="logout-btn" style="background:#ef4444;">登出</a>
+        <p>🕒 服务器时间：${now.toLocaleString()}</p>
+        <p>✅ 您已成功登录，欢迎访问私人区域。</p>
+        <div style="margin-top: 1rem;">
+          <a href="/blog" style="background:#667eea; padding:8px 20px; border-radius:40px; color:white; display:inline-block;">📝 访问博客</a>
         </div>
-        <div class="info-text" style="margin-top: 2rem;">视频来自 B站，仅供个人观看</div>
+        <a href="/logout" class="logout-btn">登 出</a>
+        <div class="info-text" style="margin-top: 2rem;">Powered by Vercel + Node.js</div>
       </div>
     </body>
     </html>
   `);
 });
+
+// ---------- 博客路由 ----------
+// 博客列表页
+app.get('/blog', requireLogin, (req, res) => {
+  const postsDir = path.join(__dirname, 'posts');
+  let files = [];
+  try {
+    files = fs.readdirSync(postsDir).filter(f => f.endsWith('.md'));
+  } catch (err) {
+    // 没有 posts 文件夹
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>博客</title>${globalStyles}</head>
+      <body>
+        <div class="card" style="max-width:800px;">
+          <h2>📝 博客</h2>
+          <p>暂无文章，请先创建 posts 文件夹并添加 .md 文件。</p>
+          <a href="/">返回主页</a>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+  
+  if (files.length === 0) {
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>博客</title>${globalStyles}</head>
+      <body>
+        <div class="card" style="max-width:800px;">
+          <h2>📝 博客</h2>
+          <p>还没有文章，去写一篇吧！</p>
+          <a href="/">返回主页</a>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+  
+  let listHtml = '<ul style="list-style:none; padding:0;">';
+  files.forEach(file => {
+    const name = file.replace('.md', '');
+    listHtml += `<li style="margin: 10px 0;"><a href="/blog/${name}">📄 ${name}</a></li>`;
+  });
+  listHtml += '</ul>';
+  
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head><title>博客列表</title>${globalStyles}</head>
+    <body>
+      <div class="card" style="max-width:800px;">
+        <h2>📝 博客列表</h2>
+        ${listHtml}
+        <div style="margin-top:20px;"><a href="/">← 回到主页</a></div>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
+// 博客文章详情页
+app.get('/blog/:slug', requireLogin, (req, res) => {
+  const slug = req.params.slug;
+  const filePath = path.join(__dirname, 'posts', `${slug}.md`);
+  try {
+    const markdown = fs.readFileSync(filePath, 'utf8');
+    const htmlContent = marked(markdown);
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>${slug}</title>${globalStyles}</head>
+      <body>
+        <div class="card" style="max-width:800px;">
+          <div class="blog-content">${htmlContent}</div>
+          <div style="margin-top:30px;">
+            <a href="/blog">← 返回博客列表</a> | 
+            <a href="/">主页</a>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (err) {
+    res.status(404).send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>404</title>${globalStyles}</head>
+      <body>
+        <div class="card"><h2>文章不存在</h2><a href="/blog">返回列表</a></div>
+      </body>
+      </html>
+    `);
+  }
+});
+
+module.exports = app;
