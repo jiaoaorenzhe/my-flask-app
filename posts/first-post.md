@@ -9,7 +9,4 @@
 - 列表项二
 
 > 引用一句话。
-
-```javascript
-console.log("Hello, 博客！");
-\```
+"Hello, 博客！"
