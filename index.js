@@ -215,7 +215,7 @@ const videoList = [
     id: '1',
     title: '示例视频 1',
     desc: '这是用 Google Drive 托管的视频',
-    fileId: 'YOUR_FILE_ID_1'  // 替换成你的 Google Drive 文件ID
+    fileId: '1A0QIEpbyzRWSh-A4jUog3vrucFkpYAuH'  // 替换成你的 Google Drive 文件ID
   },
   {
     id: '2',
