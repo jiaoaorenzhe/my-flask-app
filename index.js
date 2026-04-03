@@ -197,7 +197,7 @@ app.get('/', requireLogin, (req, res) => {
   const now = new Date();
   // 直接把 iframe 写在这里，不要用变量拼接
   const videoIframe = `
-    <iframe src="//player.bilibili.com/player.html?bvid=BV1xx411c7mD&page=1" 
+    <iframe src="//player.bilibili.com/player.html?bvid=RqXS1tV&page=1" 
             scrolling="no" 
             border="0" 
             frameborder="no" 
@@ -214,7 +214,7 @@ app.get('/', requireLogin, (req, res) => {
       <div class="card" style="max-width: 800px;">
         <h2>🎬 我的视频收藏</h2>
         <div style="margin: 20px 0;">
-          ${BV1V3XtBPECf}
+          ${videoIframe}
         </div>
         <p>当前用户：<strong>${req.session.username}</strong></p>
         <p>🕒 最后登录：${now.toLocaleString()}</p>
