@@ -45,7 +45,6 @@ const globalStyles = `
       max-width: 1400px;
       margin: 0 auto;
     }
-    /* 导航栏 */
     .nav {
       display: flex;
       flex-wrap: wrap;
@@ -68,7 +67,6 @@ const globalStyles = `
     .nav a:hover { background: rgba(255,255,255,0.2); }
     .logout-link { background: #ef4444; }
     .logout-link:hover { background: #dc2626; }
-    /* 视频网格 */
     .video-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -111,7 +109,6 @@ const globalStyles = `
       color: #4b5563;
       margin-bottom: 0.5rem;
     }
-    /* 弹窗播放器 */
     .modal {
       display: none;
       position: fixed;
@@ -213,17 +210,11 @@ app.get('/logout', (req, res) => {
 const videoList = [
   {
     id: '1',
-    title: '示例视频 1',
-    desc: '这是用 Google Drive 托管的视频',
-    fileId: '1A0QIEpbyzRWSh-A4jUog3vrucFkpYAuH'  // 替换成你的 Google Drive 文件ID
-  },
-  {
-    id: '2',
-    title: '示例视频 2',
-    desc: '第二个视频演示',
-    fileId: 'YOUR_FILE_ID_2'
+    title: '我的视频',
+    desc: '通过 Google Drive 托管的视频',
+    fileId: '1A0QIEpbyzRWSh-A4jUog3vrucFkpYAuH'  // 你提供的真实ID
   }
-  // 添加更多视频，复制上面的结构，修改 id, title, desc, fileId
+  // 可以继续添加更多视频
 ];
 
 // 辅助函数：根据 fileId 获取 Google Drive 直链
@@ -297,11 +288,7 @@ app.get('/', requireLogin, (req, res) => {
           card.addEventListener('click', () => {
             const fileId = card.dataset.fileid;
             const title = card.dataset.title;
-            if (fileId && fileId !== 'https://drive.google.com/uc?export=download&id=1A0QIEpbyzRWSh-A4jUog3vrucFkpYAuH' && fileId !== 'YOUR_FILE_ID_2') {
-              openVideo(fileId, title);
-            } else {
-              alert('请先替换视频的 fileId！在 index.js 中的 videoList 里修改。');
-            }
+            openVideo(fileId, title);
           });
         });
         
