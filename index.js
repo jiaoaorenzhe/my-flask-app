@@ -45,7 +45,7 @@
             background-color: #e5e7eb;
         }
 
-        /* 修复后的汉堡菜单线条 */
+        /* 汉堡菜单线条 */
         .menu-btn .hamburger {
             display: flex;
             flex-direction: column;
