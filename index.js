@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 
-// 主页：返回你想要的顶部导航栏 + 空白区域
 app.get('/', (req, res) => {
   res.send(`
 <!DOCTYPE html>
@@ -21,17 +20,27 @@ app.get('/', (req, res) => {
             border-bottom:1px solid #eee;
         }
         .left,.right{display:flex;gap:16px;align-items:center;}
+        .icon {
+            font-size: 24px;      /* 统一图标大小 */
+            cursor: pointer;
+            color: #000000;       /* 统一黑色 */
+            line-height: 1;
+        }
+        /* 人头图标单独确保黑色（已经是黑色，这里显式声明） */
+        .icon.user {
+            color: #000000;
+        }
         .main{height:calc(100vh - 65px);background:#fff;}
     </style>
 </head>
 <body>
     <header>
         <div class="left">
-            <span>☰</span>
+            <span class="icon">☰</span>
         </div>
         <div class="right">
-            <span>?</span>
-            <span>👤</span>
+            <span class="icon">?</span>
+            <span class="icon user">👤</span>
         </div>
     </header>
     <div class="main"></div>
@@ -40,7 +49,6 @@ app.get('/', (req, res) => {
   `);
 });
 
-// 其他所有路径都重定向到首页
 app.get('*', (req, res) => {
   res.redirect('/');
 });
