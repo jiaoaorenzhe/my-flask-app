@@ -17,7 +17,6 @@ app.get('/', (req, res) => {
             padding: 0;
             box-sizing: border-box;
         }
-        /* 亮色模式变量（默认） */
         :root {
             --bg-body: #ffffff;
             --bg-header: #ffffff;
@@ -30,7 +29,6 @@ app.get('/', (req, res) => {
             --shadow: rgba(0,0,0,0.1);
             --overlay: rgba(0,0,0,0.4);
         }
-        /* 暗色模式变量 */
         body.dark {
             --bg-body: #121212;
             --bg-header: #1e1e1e;
@@ -50,7 +48,6 @@ app.get('/', (req, res) => {
             overflow-x: hidden;
             transition: background 0.2s, color 0.2s;
         }
-        /* 顶部导航栏 */
         header {
             display: flex;
             justify-content: space-between;
@@ -75,7 +72,6 @@ app.get('/', (req, res) => {
         .icon:hover {
             opacity: 0.7;
         }
-        /* 侧边栏 */
         .sidebar {
             position: fixed;
             top: 0;
@@ -126,7 +122,6 @@ app.get('/', (req, res) => {
             font-size: 20px;
             color: var(--text-primary);
         }
-        /* 遮罩层 */
         .overlay {
             position: fixed;
             top: 0;
@@ -140,7 +135,6 @@ app.get('/', (req, res) => {
         .overlay.active {
             display: block;
         }
-        /* 主内容区域 */
         .main {
             height: calc(100vh - 65px);
             background: var(--bg-body);
@@ -173,7 +167,6 @@ app.get('/', (req, res) => {
             border-radius: 40px;
             cursor: pointer;
         }
-        /* 设置页面的开关样式 */
         .setting-item {
             display: flex;
             align-items: center;
@@ -185,9 +178,13 @@ app.get('/', (req, res) => {
             font-size: 16px;
             cursor: pointer;
         }
-        input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+        input[type="checkbox"], select {
+            width: auto;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-body);
+            color: var(--text-primary);
             cursor: pointer;
         }
         @media (max-width: 640px) {
@@ -208,72 +205,125 @@ app.get('/', (req, res) => {
         </div>
     </header>
 
-    <!-- 侧边栏 -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-times close-icon" id="closeSidebar"></i>
         </div>
         <ul class="sidebar-menu">
-            <li data-page="home"><i class="fas fa-home"></i><span>首页</span></li>
-            <li data-page="articles"><i class="fas fa-newspaper"></i><span>文章</span></li>
-            <li data-page="profile"><i class="fas fa-user"></i><span>个人中心</span></li>
-            <li data-page="settings"><i class="fas fa-cog"></i><span>设置</span></li>
+            <li data-page="home"><i class="fas fa-home"></i><span data-i18n="nav_home">首页</span></li>
+            <li data-page="articles"><i class="fas fa-newspaper"></i><span data-i18n="nav_articles">文章</span></li>
+            <li data-page="profile"><i class="fas fa-user"></i><span data-i18n="nav_profile">个人中心</span></li>
+            <li data-page="settings"><i class="fas fa-cog"></i><span data-i18n="nav_settings">设置</span></li>
         </ul>
     </div>
     <div class="overlay" id="overlay"></div>
 
-    <!-- 主内容区域 -->
     <div class="main" id="mainContent">
         <!-- 首页 -->
         <div class="content-page" id="homePage">
-            <h2>🏠 首页</h2>
-            <p>欢迎来到我的个人网站。这里将展示一些精选内容。</p>
-            <p>你可以通过左侧菜单浏览文章、管理个人资料或修改设置。</p>
+            <h2 data-i18n="home_title">🏠 首页</h2>
+            <p data-i18n="home_welcome">欢迎来到我的个人网站。这里将展示一些精选内容。</p>
+            <p data-i18n="home_hint">你可以通过左侧菜单浏览文章、管理个人资料或修改设置。</p>
         </div>
         <!-- 文章页 -->
         <div class="content-page" id="articlesPage" style="display:none;">
-            <h2>📄 文章</h2>
-            <p>这里会列出所有文章。你可以点击阅读。</p>
+            <h2 data-i18n="articles_title">📄 文章</h2>
+            <p data-i18n="articles_desc">这里会列出所有文章。你可以点击阅读。</p>
             <ul>
-                <li>如何搭建个人网站</li>
-                <li>JavaScript 基础教程</li>
-                <li>CSS Grid 布局入门</li>
+                <li data-i18n="article1">如何搭建个人网站</li>
+                <li data-i18n="article2">JavaScript 基础教程</li>
+                <li data-i18n="article3">CSS Grid 布局入门</li>
             </ul>
         </div>
         <!-- 个人中心 -->
         <div class="content-page" id="profilePage" style="display:none;">
-            <h2>👤 个人中心</h2>
-            <p>用户名: lianghonglang</p>
-            <p>邮箱: example@domain.com</p>
-            <p>注册时间: 2026-04-01</p>
-            <button id="logoutBtn">登出</button>
+            <h2 data-i18n="profile_title">👤 个人中心</h2>
+            <p><span data-i18n="profile_username">用户名</span>: lianghonglang</p>
+            <p><span data-i18n="profile_email">邮箱</span>: example@domain.com</p>
+            <p><span data-i18n="profile_regdate">注册时间</span>: 2026-04-01</p>
+            <button id="logoutBtn" data-i18n="logout">登出</button>
         </div>
         <!-- 设置页 -->
         <div class="content-page" id="settingsPage" style="display:none;">
-            <h2>⚙️ 设置</h2>
+            <h2 data-i18n="settings_title">⚙️ 设置</h2>
             <div class="setting-item">
-                <label for="darkModeToggle">🌙 暗色模式</label>
+                <label for="darkModeToggle" data-i18n="dark_mode">🌙 暗色模式</label>
                 <input type="checkbox" id="darkModeToggle">
             </div>
-            <p style="margin-top:20px; font-size:0.85rem;">更多设置项即将推出...</p>
+            <div class="setting-item">
+                <label for="languageSelect" data-i18n="language">🌐 语言</label>
+                <select id="languageSelect">
+                    <option value="zh">中文</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            <p style="margin-top:20px; font-size:0.85rem;" data-i18n="settings_more">更多设置项即将推出...</p>
         </div>
     </div>
 
     <script>
+        // ---------- 多语言文本映射 ----------
+        const translations = {
+            zh: {
+                nav_home: "首页", nav_articles: "文章", nav_profile: "个人中心", nav_settings: "设置",
+                home_title: "🏠 首页", home_welcome: "欢迎来到我的个人网站。这里将展示一些精选内容。", home_hint: "你可以通过左侧菜单浏览文章、管理个人资料或修改设置。",
+                articles_title: "📄 文章", articles_desc: "这里会列出所有文章。你可以点击阅读。",
+                article1: "如何搭建个人网站", article2: "JavaScript 基础教程", article3: "CSS Grid 布局入门",
+                profile_title: "👤 个人中心", profile_username: "用户名", profile_email: "邮箱", profile_regdate: "注册时间",
+                logout: "登出",
+                settings_title: "⚙️ 设置", dark_mode: "🌙 暗色模式", language: "🌐 语言", settings_more: "更多设置项即将推出..."
+            },
+            en: {
+                nav_home: "Home", nav_articles: "Articles", nav_profile: "Profile", nav_settings: "Settings",
+                home_title: "🏠 Home", home_welcome: "Welcome to my personal website. Here you'll find some selected content.", home_hint: "Use the left menu to browse articles, manage your profile, or change settings.",
+                articles_title: "📄 Articles", articles_desc: "Here is the list of articles. Click to read.",
+                article1: "How to build a personal website", article2: "JavaScript Basics", article3: "CSS Grid Layout Guide",
+                profile_title: "👤 Profile", profile_username: "Username", profile_email: "Email", profile_regdate: "Registered",
+                logout: "Logout",
+                settings_title: "⚙️ Settings", dark_mode: "🌙 Dark Mode", language: "🌐 Language", settings_more: "More settings coming soon..."
+            }
+        };
+
+        let currentLang = localStorage.getItem('language') || 'zh';
+
+        function applyLanguage(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+                        // 对于输入框或下拉框，可能需要处理 placeholder 或 value，但这里只处理文本内容
+                        // 暂时跳过复杂控件
+                    } else {
+                        el.innerText = translations[lang][key];
+                    }
+                }
+            });
+            // 单独处理 select 选项的文本（选项的文本也需要国际化？简单起见不处理选项内容，因为选项值本身固定）
+            // 也可以重新设置 select 的选中状态，但不需要。
+        }
+
+        // 初始化语言
+        function initLanguage() {
+            const select = document.getElementById('languageSelect');
+            if (select) {
+                select.value = currentLang;
+                applyLanguage(currentLang);
+                select.addEventListener('change', (e) => {
+                    currentLang = e.target.value;
+                    localStorage.setItem('language', currentLang);
+                    applyLanguage(currentLang);
+                });
+            }
+        }
+
         // ---------- 侧边栏控制 ----------
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
         const closeSidebar = document.getElementById('closeSidebar');
 
-        function openSidebar() {
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
-        }
-        function closeSidebarFunc() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        }
+        function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('active'); }
+        function closeSidebarFunc() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
         menuBtn.addEventListener('click', openSidebar);
         closeSidebar.addEventListener('click', closeSidebarFunc);
         overlay.addEventListener('click', closeSidebarFunc);
@@ -297,7 +347,6 @@ app.get('/', (req, res) => {
 
         // ---------- 暗色模式 ----------
         const darkModeToggle = document.getElementById('darkModeToggle');
-        // 检查本地存储的偏好
         const isDark = localStorage.getItem('darkMode') === 'true';
         if (isDark) {
             document.body.classList.add('dark');
@@ -313,14 +362,16 @@ app.get('/', (req, res) => {
             }
         });
 
-        // ---------- 个人中心登出按钮（演示） ----------
+        // ---------- 个人中心登出 ----------
         const logoutBtn = document.getElementById('logoutBtn');
         if(logoutBtn) {
             logoutBtn.addEventListener('click', () => {
                 alert('登出功能尚未对接后端，实际应跳转到 /logout');
-                // window.location.href = '/logout';
             });
         }
+
+        // 初始化语言设置
+        initLanguage();
     </script>
 </body>
 </html>
