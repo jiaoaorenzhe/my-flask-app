@@ -1,14 +1,9 @@
-const http = require('http');
+const express = require('express');
+const app = express();
 
-const server = http.createServer((req, res) => {
-    // 统一设置响应头
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache');
-
-    if (req.url === '/') {
-        res.statusCode = 200;
-        // 顶部导航栏 + 空白页面，完全你要的效果
-        res.end(`
+// 主页：返回你想要的顶部导航栏 + 空白区域
+app.get('/', (req, res) => {
+  res.send(`
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -42,17 +37,12 @@ const server = http.createServer((req, res) => {
     <div class="main"></div>
 </body>
 </html>
-        `);
-    } else {
-        res.statusCode = 302;
-        res.setHeader('Location', '/');
-        res.end();
-    }
+  `);
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// 其他所有路径都重定向到首页
+app.get('*', (req, res) => {
+  res.redirect('/');
 });
 
-module.exports = server;
+module.exports = app;
