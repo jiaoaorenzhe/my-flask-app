@@ -1,11 +1,10 @@
 {
-  "name": "my-video-site",
+  "name": "simple-nav-page",
   "version": "1.0.0",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "express-session": "^1.17.3"
+    "express": "^4.18.2"
   }
 }
