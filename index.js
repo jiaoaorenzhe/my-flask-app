@@ -17,10 +17,38 @@ app.get('/', (req, res) => {
             padding: 0;
             box-sizing: border-box;
         }
+        /* 亮色模式变量（默认） */
+        :root {
+            --bg-body: #ffffff;
+            --bg-header: #ffffff;
+            --text-primary: #1c1c1e;
+            --text-secondary: #6c6c70;
+            --border-color: #e9e9ef;
+            --sidebar-bg: #ffffff;
+            --sidebar-hover: #f5f5f5;
+            --card-bg: #ffffff;
+            --shadow: rgba(0,0,0,0.1);
+            --overlay: rgba(0,0,0,0.4);
+        }
+        /* 暗色模式变量 */
+        body.dark {
+            --bg-body: #121212;
+            --bg-header: #1e1e1e;
+            --text-primary: #e5e5e7;
+            --text-secondary: #a1a1a6;
+            --border-color: #2c2c2e;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #2c2c2e;
+            --card-bg: #1e1e1e;
+            --shadow: rgba(0,0,0,0.3);
+            --overlay: rgba(0,0,0,0.7);
+        }
         body {
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            background: #fff;
+            background: var(--bg-body);
+            color: var(--text-primary);
             overflow-x: hidden;
+            transition: background 0.2s, color 0.2s;
         }
         /* 顶部导航栏 */
         header {
@@ -28,8 +56,8 @@ app.get('/', (req, res) => {
             justify-content: space-between;
             align-items: center;
             padding: 16px 20px;
-            border-bottom: 1px solid #eee;
-            background: white;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-header);
             position: relative;
             z-index: 10;
         }
@@ -40,7 +68,7 @@ app.get('/', (req, res) => {
         }
         .icon {
             font-size: 24px;
-            color: #000000;
+            color: var(--text-primary);
             cursor: pointer;
             transition: opacity 0.2s;
         }
@@ -54,8 +82,8 @@ app.get('/', (req, res) => {
             left: -280px;
             width: 280px;
             height: 100%;
-            background: white;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+            background: var(--sidebar-bg);
+            box-shadow: 2px 0 12px var(--shadow);
             z-index: 20;
             transition: left 0.3s ease;
             display: flex;
@@ -69,11 +97,11 @@ app.get('/', (req, res) => {
             display: flex;
             justify-content: flex-end;
             padding: 0 20px 20px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
         }
         .close-icon {
             font-size: 24px;
-            color: #000;
+            color: var(--text-primary);
             cursor: pointer;
         }
         .sidebar-menu {
@@ -88,17 +116,15 @@ app.get('/', (req, res) => {
             font-size: 18px;
             cursor: pointer;
             transition: background 0.2s;
+            color: var(--text-primary);
         }
         .sidebar-menu li:hover {
-            background: #f5f5f5;
+            background: var(--sidebar-hover);
         }
         .sidebar-menu li i {
             width: 24px;
             font-size: 20px;
-            color: #000;
-        }
-        .sidebar-menu li span {
-            color: #1c1c1e;
+            color: var(--text-primary);
         }
         /* 遮罩层 */
         .overlay {
@@ -107,7 +133,7 @@ app.get('/', (req, res) => {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.4);
+            background: var(--overlay);
             z-index: 15;
             display: none;
         }
@@ -117,7 +143,7 @@ app.get('/', (req, res) => {
         /* 主内容区域 */
         .main {
             height: calc(100vh - 65px);
-            background: #fff;
+            background: var(--bg-body);
             padding: 24px;
             overflow-y: auto;
         }
@@ -129,11 +155,40 @@ app.get('/', (req, res) => {
             font-size: 28px;
             margin-bottom: 20px;
             font-weight: 600;
+            color: var(--text-primary);
         }
-        .content-page p {
+        .content-page p, .content-page li {
             line-height: 1.6;
-            color: #333;
-            margin-bottom: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        .content-page ul {
+            padding-left: 20px;
+        }
+        button {
+            padding: 8px 20px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        /* 设置页面的开关样式 */
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .setting-item label {
+            font-size: 16px;
+            cursor: pointer;
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
         }
         @media (max-width: 640px) {
             .sidebar { width: 260px; }
@@ -159,33 +214,23 @@ app.get('/', (req, res) => {
             <i class="fas fa-times close-icon" id="closeSidebar"></i>
         </div>
         <ul class="sidebar-menu">
-            <li data-page="home">
-                <i class="fas fa-home"></i>
-                <span>首页</span>
-            </li>
-            <li data-page="articles">
-                <i class="fas fa-newspaper"></i>
-                <span>文章</span>
-            </li>
-            <li data-page="profile">
-                <i class="fas fa-user"></i>
-                <span>个人中心</span>
-            </li>
-            <li data-page="settings">
-                <i class="fas fa-cog"></i>
-                <span>设置</span>
-            </li>
+            <li data-page="home"><i class="fas fa-home"></i><span>首页</span></li>
+            <li data-page="articles"><i class="fas fa-newspaper"></i><span>文章</span></li>
+            <li data-page="profile"><i class="fas fa-user"></i><span>个人中心</span></li>
+            <li data-page="settings"><i class="fas fa-cog"></i><span>设置</span></li>
         </ul>
     </div>
     <div class="overlay" id="overlay"></div>
 
-    <!-- 主内容区域：不同页面的内容会动态替换 -->
+    <!-- 主内容区域 -->
     <div class="main" id="mainContent">
+        <!-- 首页 -->
         <div class="content-page" id="homePage">
             <h2>🏠 首页</h2>
             <p>欢迎来到我的个人网站。这里将展示一些精选内容。</p>
             <p>你可以通过左侧菜单浏览文章、管理个人资料或修改设置。</p>
         </div>
+        <!-- 文章页 -->
         <div class="content-page" id="articlesPage" style="display:none;">
             <h2>📄 文章</h2>
             <p>这里会列出所有文章。你可以点击阅读。</p>
@@ -195,23 +240,27 @@ app.get('/', (req, res) => {
                 <li>CSS Grid 布局入门</li>
             </ul>
         </div>
+        <!-- 个人中心 -->
         <div class="content-page" id="profilePage" style="display:none;">
             <h2>👤 个人中心</h2>
             <p>用户名: lianghonglang</p>
             <p>邮箱: example@domain.com</p>
             <p>注册时间: 2026-04-01</p>
-            <button id="logoutBtn" style="margin-top:20px; padding:8px 20px; background:#ef4444; color:white; border:none; border-radius:40px; cursor:pointer;">登出</button>
+            <button id="logoutBtn">登出</button>
         </div>
+        <!-- 设置页 -->
         <div class="content-page" id="settingsPage" style="display:none;">
             <h2>⚙️ 设置</h2>
-            <p>主题切换（暂未实现）</p>
-            <p>通知设置（暂未实现）</p>
-            <p>隐私设置（暂未实现）</p>
+            <div class="setting-item">
+                <label for="darkModeToggle">🌙 暗色模式</label>
+                <input type="checkbox" id="darkModeToggle">
+            </div>
+            <p style="margin-top:20px; font-size:0.85rem;">更多设置项即将推出...</p>
         </div>
     </div>
 
     <script>
-        // 侧边栏控制
+        // ---------- 侧边栏控制 ----------
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -229,48 +278,49 @@ app.get('/', (req, res) => {
         closeSidebar.addEventListener('click', closeSidebarFunc);
         overlay.addEventListener('click', closeSidebarFunc);
 
-        // 页面切换逻辑
+        // ---------- 页面切换 ----------
         const pages = {
             home: document.getElementById('homePage'),
             articles: document.getElementById('articlesPage'),
             profile: document.getElementById('profilePage'),
             settings: document.getElementById('settingsPage')
         };
-
         function showPage(pageId) {
-            // 隐藏所有页面
-            Object.values(pages).forEach(page => {
-                if (page) page.style.display = 'none';
-            });
-            // 显示选中页面
-            if (pages[pageId]) {
-                pages[pageId].style.display = 'block';
-            }
-            // 关闭侧边栏
+            Object.values(pages).forEach(p => { if(p) p.style.display = 'none'; });
+            if(pages[pageId]) pages[pageId].style.display = 'block';
             closeSidebarFunc();
         }
-
-        // 为侧边栏菜单添加点击事件
-        const menuItems = document.querySelectorAll('.sidebar-menu li');
-        menuItems.forEach(item => {
+        document.querySelectorAll('.sidebar-menu li').forEach(item => {
             const page = item.getAttribute('data-page');
-            if (page) {
-                item.addEventListener('click', () => {
-                    showPage(page);
-                });
+            if(page) item.addEventListener('click', () => showPage(page));
+        });
+
+        // ---------- 暗色模式 ----------
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        // 检查本地存储的偏好
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        if (isDark) {
+            document.body.classList.add('dark');
+            darkModeToggle.checked = true;
+        }
+        darkModeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.body.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.body.classList.remove('dark');
+                localStorage.setItem('darkMode', 'false');
             }
         });
 
-        // 个人中心的登出按钮（仅演示，实际需要后端处理）
+        // ---------- 个人中心登出按钮（演示） ----------
         const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
+        if(logoutBtn) {
             logoutBtn.addEventListener('click', () => {
                 alert('登出功能尚未对接后端，实际应跳转到 /logout');
-                // 可以后续改为 window.location.href = '/logout';
+                // window.location.href = '/logout';
             });
         }
-
-        // 默认显示首页（已显示，无需额外操作）
     </script>
 </body>
 </html>
