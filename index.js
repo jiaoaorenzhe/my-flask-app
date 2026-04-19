@@ -5,19 +5,16 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session 配置
 app.use(session({
   secret: 'your-secret-key-change-it',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 } // 1小时
+  cookie: { maxAge: 1000 * 60 * 60 }
 }));
 
-// 管理员验证
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = '2013n12y30r@lang';
 
-// 登录保护中间件（只检查是否有 session 标识，管理员或游客都允许访问主页）
 function requireAccess(req, res, next) {
   if (req.session.isAdmin || req.session.isGuest) {
     next();
@@ -37,6 +34,8 @@ app.get('/login', (req, res) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -56,7 +55,14 @@ app.get('/login', (req, res) => {
         .login-container {
             width: 100%;
             max-width: 400px;
-            margin-top: 120px;
+            margin-top: 80px;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #1d1d1f;
         }
         .input-group {
             margin-bottom: 28px;
@@ -95,6 +101,7 @@ app.get('/login', (req, res) => {
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
+            color: #86868b;
             font-size: 20px;
         }
         .login-btn {
@@ -134,6 +141,7 @@ app.get('/login', (req, res) => {
 </head>
 <body>
     <div class="login-container">
+        <h1>登录到 ProudAodao</h1>
         <form method="post" action="/login">
             <div class="input-group">
                 <div class="label-row">
@@ -147,7 +155,7 @@ app.get('/login', (req, res) => {
                 </div>
                 <div class="password-wrapper">
                     <input type="password" name="password" id="password-input" required>
-                    <span class="eye-icon" onclick="togglePassword()">👁️</span>
+                    <i class="fas fa-eye eye-icon" id="togglePassword"></i>
                 </div>
             </div>
             <button type="submit" class="login-btn">管理员登录</button>
@@ -157,10 +165,15 @@ app.get('/login', (req, res) => {
         </form>
     </div>
     <script>
-        function togglePassword() {
-            const input = document.getElementById('password-input');
-            input.type = input.type === 'password' ? 'text' : 'password';
-        }
+        const toggleBtn = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password-input');
+        toggleBtn.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            // 切换图标
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
     </script>
 </body>
 </html>
@@ -180,8 +193,8 @@ app.post('/login', (req, res) => {
     res.send(`
       <!DOCTYPE html>
       <html>
-      <head><title>登录失败</title><style>body{font-family:sans-serif;padding:2rem;}</style></head>
-      <body><div class="error-msg">用户名或密码错误</div><a href="/login">返回登录</a></body></html>
+      <head><title>登录失败</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"><style>body{font-family:sans-serif;padding:2rem;text-align:center;}</style></head>
+      <body><div class="error-msg" style="color:red;">用户名或密码错误</div><a href="/login">返回登录</a></body></html>
     `);
   }
 });
@@ -202,7 +215,7 @@ app.get('/logout', (req, res) => {
   });
 });
 
-// ---------- 主页（需要登录或游客模式）----------
+// ---------- 主页（需要登录或游客）----------
 app.get('/', requireAccess, (req, res) => {
   const username = req.session.username || (req.session.isAdmin ? '管理员' : '游客');
   const isAdmin = req.session.isAdmin || false;
@@ -515,7 +528,6 @@ app.get('/', requireAccess, (req, res) => {
   res.send(html);
 });
 
-// 其他所有未匹配路由重定向到主页
 app.get('*', (req, res) => {
   res.redirect('/');
 });
